@@ -49,6 +49,18 @@ class NewContact extends React.Component{
 
     componentDidMount() {
         let contact = this.props.location.contact ?? null;
+        let paramdId = this.props.match.params['id'];
+        if(!contact && paramdId){
+            find({id: this.props.match.params['id']})
+                .then(res => res.json())
+                .then(contact => this.setState({ 
+                    name: contact.name,
+                    title: contact.title,
+                    phone: contact.phone,
+                    avatar: contact.avatar,
+                    id: contact.id,
+                 }));
+        }  
         if(contact) {
             this.setState({ 
                 name: contact.name,
@@ -142,6 +154,10 @@ class NewContact extends React.Component{
             </div>
         );
     }
+}
+
+function find(props) {
+    return fetch('http://127.0.0.1:8000/api/contacts/'+props.id);
 }
 
 function submit(props) {
