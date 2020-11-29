@@ -3,6 +3,7 @@ import ReactDOM from 'react-dom';
 import { BrowserRouter, Link, Route, Switch } from 'react-router-dom';
 import './contact.css';
 import NewContact from './components/NewContact'
+// import { Provider } from 'react-redux'
 
 class AddContactButtons extends React.Component {
     render() {
@@ -22,16 +23,32 @@ class AddContactButtons extends React.Component {
 }
 
 class Contact extends React.Component {
+    constructor(props) {
+        super(props);
+        this.state = {};
+    }
     render() {
         return (
             <div className="contact">
-            <div className="contact-avatar">
-                <img src={this.props.avatar} alt="Avatar" />
-            </div>
-            <div className="contact-details">
-                <div className="contact-name">{this.props.title} {this.props.name}</div>
-                <div className="contact-phone">{this.props.phone}</div>
-            </div>
+                <div className="contact-avatar">
+                        <img src={this.props.avatar} alt="Avatar" />
+                </div>
+                <div className="contact-details">
+                <Link to={{
+                        pathname: "/contacts/"+this.props.id,
+                        contact: { 
+                            avatar: this.props.avatar,
+                            name: this.props.name,
+                            title: this.props.title,
+                            phone: this.props.phone,
+                            id: this.props.id,
+                        }
+                    }}>
+                    <div className="contact-name">{this.props.title} {this.props.name}</div>
+                    </Link>
+                    <div className="contact-phone">{this.props.phone}</div>
+                </div>
+            
             <div className="contact-buttons">
                 <button>
                     <i 
@@ -46,7 +63,11 @@ class Contact extends React.Component {
                     <i 
                         className="fa fa-times" 
                         aria-hidden="true" 
-                        onClick={() => showDeleteConfirmation(this.props.id)}
+                        onClick={ () => (window.confirm('Are you sure you want to delete this contact?')) ?
+                            deleteContact(this.props.id)
+                                .then(() => this.props.handleDelete(), error => console.log(error))
+                            : ''
+                        }
                     >
                     </i>
             </div>
@@ -61,15 +82,8 @@ function call(phone) {
     }
 }
 
-function showDeleteConfirmation(id) {
-    if(window.confirm('Are you sure you want to delete this contact?')){
-        deleteContact(id);
-    }
-}
-
 function deleteContact(id){
-    fetch('https://contacts.test/api/contacts/'+id, { method: 'DELETE' })
-        .then(console.log('deleted ' + id), console.log('error'));
+    return fetch('https://contacts.test/api/contacts/'+id, { method: 'DELETE' });
 }
 
 
@@ -90,39 +104,52 @@ class Contacts extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-            contacts: null
-        }
+            contacts: null,
+            data: null,
+            deleted: ''
+        };
+
+        this.handleDelete = this.handleDelete.bind(this);
+    }
+
+    handleDelete(id) {
+        let data = this.state.data;
+        data.pop(data.findIndex(contact => contact.id === id));
+        this.setState({ data: data });
     }
 
     componentDidMount(){
         fetch('https://contacts.test/api/contacts')
         .then(res => res.json())
-            .then(contacts => this.setState({ contacts }), console.log('error'))
+            .then(contacts => this.setState({ contacts: contacts, data: contacts.data}), error => console.log(error))
     }
 
     render() {
         const { contacts } = this.state;
         return (
-            <div className="contact-container">
-                <Search />
-                <div className="contacts-container">
-                { contacts ? (
-                    contacts.data.map(contact => (
-                        <Contact 
-                            key={contact.id}
-                            id={contact.id}
-                            title={contact.title}
-                            name={contact.name}  
-                            phone={contact.phone}
-                            avatar={contact.avatar}
-                        />
-                    ))
-                ) : (
-                    <div>Loading...</div>
-                )}
+            // <Provider>
+                <div className="contact-container">
+                    <Search />
+                    <div className="contacts-container">
+                    { contacts ? (
+                        contacts.data.map(contact => (
+                            <Contact 
+                                key={contact.id}
+                                id={contact.id}
+                                title={contact.title}
+                                name={contact.name}  
+                                phone={contact.phone}
+                                avatar={contact.avatar}
+                                handleDelete={() => this.handleDelete(contact.id)}
+                            />
+                        ))
+                    ) : (
+                        <div>Loading...</div>
+                    )}
+                    </div>
+                    <AddContactButtons />
                 </div>
-                <AddContactButtons />
-            </div>
+            // {/* </Provider> */}
         );
     }
 }
@@ -132,14 +159,17 @@ class Base extends React.Component {
         return(
             <BrowserRouter>
                 <Switch>
-                    <Route exact path="/">
+                    <Route exact path="/contacts">
                         <Contacts />
                     </Route>
-                    <Route path="/contacts">
-                        <Contacts />
+                    <Route path="/contacts/:id">
+                        <NewContact />
                     </Route>
                     <Route path="/new">
                         <NewContact />
+                    </Route>
+                    <Route path="/">
+                        <Contacts />
                     </Route>
                 </Switch>
             </BrowserRouter>
