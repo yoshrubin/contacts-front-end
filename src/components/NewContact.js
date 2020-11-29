@@ -12,7 +12,9 @@ class NewContact extends React.Component{
             avatar: '',
             id: '',
             home: false,
-            isNew: true
+            isNew: true,
+            nameError: false,
+            phoneError: false
         };
 
         this.handleNameChange = this.handleNameChange.bind(this);
@@ -21,6 +23,8 @@ class NewContact extends React.Component{
     }
 
     handleNameChange(event) {
+        event.target.value.length > 30 ? 
+        this.setState({ nameError: true }) :
         this.setState({ name: event.target.value});
     }
 
@@ -29,6 +33,8 @@ class NewContact extends React.Component{
     }
 
     handlePhoneChange(event) {
+        /[^\d-]/.test(event.target.value) ?
+        this.setState({ phoneError: true }) :
         this.setState({ phone: event.target.value });
     }
 
@@ -59,9 +65,17 @@ class NewContact extends React.Component{
 
     render() {
         let error;
+        let nameError;
+        let phoneError;
         const notExists = this.props.match.params['id'] && !this.state.id;
         if(this.state.home){
             return <Redirect to='/' />
+        }
+        if(this.state.nameError) {
+            nameError = <div className="error">Name cannot be longer than 30 characters</div>;
+        }
+        if(this.state.phoneError) {
+            phoneError = <div className="error">Phone can only contain numbers or dashes</div>;
         }
         if(notExists) {
             error = <div className="error">This contact does not exist</div>;
@@ -94,6 +108,7 @@ class NewContact extends React.Component{
                                 disabled={notExists}
                             />
                         </div>
+                        {nameError}
                         <div className="new-contact-input">
                             <label>Phone</label>
                             <input 
@@ -103,6 +118,7 @@ class NewContact extends React.Component{
                                 disabled={notExists}
                             />
                         </div>
+                        {phoneError}
                         <div className="new-contact-input">
                             <label>Title</label>
                             <input 
