@@ -88,10 +88,26 @@ function deleteContact(id){
 
 
 class Search extends React.Component {
+    constructor(props) {
+        super(props);
+        this.state = {
+            search: ''
+        }
+        this.handleSearch = this.handleSearch.bind(this);
+    }
+    handleSearch(event) {
+        this.setState({ search: event.target.value });
+        this.props.search(event.target.value);
+    }
     render() {
         return (
             <div className="search-input">
-                <input type="text" placeholder="search in contacts..." />
+                <input 
+                    value={this.state.search} 
+                    onChange={this.handleSearch} 
+                    type="text" 
+                    placeholder="search in contacts..." 
+                />
                 <div className="search-icon">
                     <i className="fa fa-search" aria-hidden="true"></i>
                 </div>
@@ -109,7 +125,15 @@ class Contacts extends React.Component {
             deleted: ''
         };
 
+        this.handleSearch = this.handleSearch.bind(this);
         this.handleDelete = this.handleDelete.bind(this);
+    }
+
+    handleSearch(searchParams) {
+        console.log(searchParams);
+        let data = this.state.contacts.data;
+        let filtered = data.filter(contact => contact.name.includes(searchParams));
+        this.setState({ data: filtered });
     }
 
     handleDelete(id) {
@@ -125,14 +149,14 @@ class Contacts extends React.Component {
     }
 
     render() {
-        const { contacts } = this.state;
+        const { data } = this.state;
         return (
             // <Provider>
                 <div className="contact-container">
-                    <Search />
+                    <Search search={this.handleSearch} />
                     <div className="contacts-container">
-                    { contacts ? (
-                        contacts.data.map(contact => (
+                    { data ? (
+                        data.map(contact => (
                             <Contact 
                                 key={contact.id}
                                 id={contact.id}
