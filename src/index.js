@@ -119,7 +119,7 @@ class Contacts extends React.Component {
     }
 
     componentDidMount(){
-        fetch('https://contacts.test/api/contacts')
+        fetch('http://127.0.0.1:8000/api/contacts')
         .then(res => res.json())
             .then(contacts => this.setState({ contacts: contacts, data: contacts.data}), error => console.log(error))
     }

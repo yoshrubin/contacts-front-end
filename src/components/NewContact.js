@@ -127,7 +127,7 @@ class NewContact extends React.Component{
 }
 
 function submit(props) {
-    return fetch('https://contacts.test/api/contacts', { 
+    return fetch('http://127.0.0.1:8000/api/contacts', { 
         method: 'POST', 
         body: JSON.stringify(props), 
         headers: { 'Content-Type': 'application/json' } 
