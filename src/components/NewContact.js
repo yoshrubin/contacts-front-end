@@ -12,6 +12,7 @@ class NewContact extends React.Component{
             avatar: '',
             id: '',
             home: false,
+            isNew: true
         };
 
         this.handleNameChange = this.handleNameChange.bind(this);
@@ -49,6 +50,7 @@ class NewContact extends React.Component{
                 phone: contact.phone,
                 avatar: contact.avatar,
                 id: contact.id,
+                isNew: false
             });
         } else if (this.state.avatar === '') {
             this.randomAvatar();
@@ -127,10 +129,16 @@ class NewContact extends React.Component{
 }
 
 function submit(props) {
-    return fetch('http://127.0.0.1:8000/api/contacts', { 
+    return props.isNew ?
+    fetch('http://127.0.0.1:8000/api/contacts', { 
         method: 'POST', 
         body: JSON.stringify(props), 
         headers: { 'Content-Type': 'application/json' } 
+    }) :
+    fetch('http://127.0.0.1:8000/api/contacts/'+props.id, {
+        method: 'PUT',
+        body: JSON.stringify(props),
+        headers: { 'Content-Type': 'application/json' }
     });
 }
 
