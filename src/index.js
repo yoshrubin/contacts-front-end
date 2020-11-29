@@ -6,6 +6,24 @@ import NewContact from './components/NewContact'
 // import { Provider } from 'react-redux'
 
 class AddContactButtons extends React.Component {
+
+    createRandom() {
+        fetch('https://randomuser.me/api/')
+            .then(res => res.json())
+            .then(contact => {
+                let user = contact.results[0]
+                let randomContact = {
+                    key: contact.info.seed,
+                    id: contact.info.seed,
+                    name: user.name.first + ' ' + user.name.last,
+                    title: user.name.title,
+                    phone: user.phone,
+                    avatar: user.picture.large
+                };
+                this.props.handleCreateRandomContact(randomContact);
+            });
+    }
+
     render() {
         return (
             <div className="contact-new">
@@ -15,7 +33,7 @@ class AddContactButtons extends React.Component {
                     </button>
                 </Link>
                 <button>
-                    <i className="fa fa-random random" aria-hidden="true"></i>
+                    <i className="fa fa-random random" aria-hidden="true" onClick={() => this.createRandom()}></i>
                 </button>
             </div>
         )
@@ -127,6 +145,7 @@ class Contacts extends React.Component {
 
         this.handleSearch = this.handleSearch.bind(this);
         this.handleDelete = this.handleDelete.bind(this);
+        this.handleCreateRandomContact = this.handleCreateRandomContact.bind(this);
     }
 
     handleSearch(searchParams) {
@@ -140,6 +159,13 @@ class Contacts extends React.Component {
         let data = this.state.data;
         data.pop(data.findIndex(contact => contact.id === id));
         this.setState({ data: data });
+    }
+
+    handleCreateRandomContact(contact) {
+        let data = this.state.data;
+        data.push(contact);
+        this.setState({ data: data });
+        submit(contact);
     }
 
     componentDidMount(){
@@ -171,7 +197,7 @@ class Contacts extends React.Component {
                         <div>Loading...</div>
                     )}
                     </div>
-                    <AddContactButtons />
+                    <AddContactButtons handleCreateRandomContact={this.handleCreateRandomContact}/>
                 </div>
             // {/* </Provider> */}
         );
@@ -199,6 +225,14 @@ class Base extends React.Component {
             </BrowserRouter>
         );
     }
+}
+
+function submit(props) {
+    return fetch('http://127.0.0.1:8000/api/contacts', {
+        method: 'POST',
+        body: JSON.stringify(props),
+        headers: { 'Content-Type': 'application/json' }
+    });
 }
 
 // ========================================
