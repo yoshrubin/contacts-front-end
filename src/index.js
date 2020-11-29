@@ -149,9 +149,9 @@ class Contacts extends React.Component {
     }
 
     handleSearch(searchParams) {
-        console.log(searchParams);
         let data = this.state.contacts.data;
-        let filtered = data.filter(contact => contact.name.includes(searchParams));
+        let filtered = data.filter(contact => contact.name.includes(searchParams) || 
+            contact.phone.includes(searchParams));
         this.setState({ data: filtered });
     }
 
